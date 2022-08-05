@@ -7,7 +7,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
     setWindowTitle("HEX助手 v"+QApplication::applicationVersion());
 }
 
@@ -21,13 +20,8 @@ void MainWindow::on_pushButton_FORMAT_clicked()
     QString strHex = ui->textEdit->toPlainText();
 
     if(strHex.length()==0) return;
-
-    strHex = strHex.toLower();
-    strHex = strHex.replace("\r","").replace("\n","").replace("  "," ");
-    strHex = strHex.toUpper();
-    ui->plainTextEdit_FORMATRESULT->setPlainText(strHex);
+    ui->plainTextEdit_FORMATRESULT->setPlainText(fmt(strHex));
 }
-
 
 void MainWindow::on_pushButton_Add_clicked()
 {
@@ -35,13 +29,9 @@ void MainWindow::on_pushButton_Add_clicked()
 
     if(strHex.length()==0) return;
 
-    strHex = strHex.toLower();
-    strHex = strHex.replace("\r","").replace("\n","");
-    strHex = strHex.toUpper();
-
     qint16 result  = 0;
-    QStringList hex = strHex.split(" ");
-    for(QString &h:hex){
+    QString hex = fmt(strHex);
+    for(QString &h:hex.split(" ")){
         if(h.length()==0) continue;
 
         bool ok;
@@ -74,6 +64,20 @@ void MainWindow::on_pushButton_CONCAT_clicked()
         format+=" "+ *(i);
     }
 
-    ui->plainTextEdit_FORMATRESULT->setPlainText(format + " " + result);
+    ui->plainTextEdit_FORMATRESULT->setPlainText(fmt(format+result));
+}
+
+QString MainWindow::fmt(QString s)
+{
+    QRegExp rx("([0-9A-Fa-f]{1,2})");
+
+    int pos(0);
+    QStringList strList;
+    while ((pos = rx.indexIn(s, pos)) != -1)
+    {
+        strList.push_back(rx.capturedTexts().at(0));
+        pos += rx.matchedLength();
+    }
+    return strList.join(" ").toUpper();
 }
 
